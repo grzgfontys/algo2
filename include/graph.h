@@ -2,9 +2,10 @@
 #define ALGORITHMS_2_GRAPH_H
 
 #include <span>
-#include <initializer_list>
+#include <vector>
 
 using std::span;
+using std::vector;
 
 class Graph
 {
@@ -13,7 +14,7 @@ public:
     {
         int src, dst;
     };
-private:
+public:
     span<span<int>> m_adjacency_matrix;
 public:
     explicit Graph(int vertex_count);
@@ -24,7 +25,11 @@ public:
 
     void remove_edge(Edge edge);
 
-    bool are_connected(Graph::Edge edge);
+    [[nodiscard]] bool are_connected(Graph::Edge edge) const;
+
+    [[nodiscard]] vector<int> vertices() const;
+
+    [[nodiscard]] vector<Edge> edges() const;
 
     virtual ~Graph();
 };
