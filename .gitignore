@@ -6,6 +6,10 @@
 # Cmake Build directory
 cmake-build-debug/
 
+# Graphviz files
+*.dot
+*.pdf
+
 # Compiled Object files
 *.slo
 *.lo

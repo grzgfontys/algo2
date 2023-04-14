@@ -62,22 +62,15 @@ void connectGraph(int** matrix, int vertices) {
     std::cin >> stop;
 }
 
-void print_matrix(int** matrix, int vertices) {
+void print_matrix(const Graph& graph) {
 
-    for (int i = 0; i < vertices; i++) {
-        for (int j = 0; j < vertices; j++) {
-            std::cout << matrix[i][j];
+    for (int i : graph.vertices()) {
+        for (int j : graph.vertices()) {
+            std::cout << (graph.are_connected({i,j}) ? 1 : 0) << " ";
         }
         std::cout << "\n";
     }
-}
-
-bool should_assign(int probability) {
-    int outcome = rand() % 100 + 1;
-    if (outcome >= probability)
-        return true;
-    else
-        return false;
+    std::cout.flush();
 }
 
 bool validate_vertex_cover(const int* vertex_cover_vertices, int** vertexCoverMatrix, int vertices) {
@@ -152,36 +145,36 @@ bool vertex_cover_of_size(int** matrix, int vertices) {
 //}
 
 int main() {
-    srand((unsigned) time(nullptr));
-    std::cout << "Hello World!\n";
-    int verts, probability;
-    std::cin >> verts;
+    int vertex_count, probability;
+    std::cout << "Input number of vertices: ";
+    std::cin >> vertex_count;
+    std::cout << "Input probability of connection: ";
     std::cin >> probability;
 
     probability = (probability - 100) * -1;
 
-    /*   int matrix[verts][verts];
+    /*   int matrix[vertex_count][vertex_count];
        memset(matrix, 0, sizeof matrix);*/
 
 
-    Graph graph = Graph::randomized(verts, static_cast<double>(probability) / 100.0);
+    Graph graph = Graph::randomized(vertex_count, static_cast<double>(probability) / 100.0);
 
-    int** matrix = new int*[verts];
-    for (int i = 0; i < verts; ++i) {
+    int** matrix = new int*[vertex_count];
+    for (int i = 0; i < vertex_count; ++i) {
         matrix[i] = graph.m_adjacency_matrix[i].data();
     }
 
     visualise_graph(graph);
-    print_matrix(matrix, verts);
+    print_matrix(graph);
 
-    //connectGraph(matrix, verts);
+    //connectGraph(matrix, vertex_count);
 
-    //visualise_graph(matrix, verts);
-    //print_matrix(matrix, verts);
+    //visualise_graph(matrix, vertex_count);
+    //print_matrix(matrix, vertex_count);
 
     //per();
 
-    if (vertex_cover_of_size(matrix, verts)) {
+    if (vertex_cover_of_size(matrix, vertex_count)) {
         std::cout << "possible";
     } else {
         std::cout << "not possible";
