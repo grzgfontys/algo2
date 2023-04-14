@@ -20,6 +20,12 @@ public:
 
     static Graph randomized(int vertex_count, double connection_probability);
 
+    void add_edge(Edge edge);
+
+    void remove_edge(Edge edge);
+
+    bool are_connected(Graph::Edge edge);
+
     virtual ~Graph();
 };
 

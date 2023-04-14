@@ -22,7 +22,6 @@ Graph Graph::randomized(int vertex_count, double connection_probability) {
     }
 
     Graph graph = Graph(vertex_count);
-    span<span<int>>& adj_matrix = graph.m_adjacency_matrix;
 
     std::random_device rd{};
     std::mt19937 mt(rd());
@@ -32,14 +31,35 @@ Graph Graph::randomized(int vertex_count, double connection_probability) {
     for (int i = 0; i < vertex_count; i++) {
         for (int j = i + 1; j < vertex_count; j++) {
             if (should_assign()) {
-                adj_matrix[i][j] = 1;
-                adj_matrix[j][i] = 1;
+                graph.add_edge({i,j});
             } else {
-                adj_matrix[i][j] = 0;
-                adj_matrix[j][i] = 0;
+                graph.remove_edge({i,j});
             }
         }
     }
 
     return graph;
+}
+
+void Graph::add_edge(Graph::Edge edge) {
+    auto[i,j] = edge;
+    m_adjacency_matrix[i][j] = 1;
+    m_adjacency_matrix[j][i] = 1;
+}
+
+void Graph::remove_edge(Graph::Edge edge) {
+    auto[i,j] = edge;
+    m_adjacency_matrix[i][j] = 0;
+    m_adjacency_matrix[j][i] = 0;
+}
+
+bool Graph::are_connected(Graph::Edge edge) {
+    auto[i,j] = edge;
+    if (m_adjacency_matrix[i][j] > 0 && m_adjacency_matrix[j][i] > 0) {
+        return true;
+    }
+    if (m_adjacency_matrix[i][j] == 0 && m_adjacency_matrix[j][i] == 0) {
+        return false;
+    }
+    throw std::logic_error("Unidirectional edge in non-directed graph");
 }
