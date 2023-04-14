@@ -2,6 +2,8 @@
 #include <fstream>
 #include <queue>
 #include <algorithm>
+#include <span>
+#include "graph.h"
 
 std::vector<bool> breadth_first_print(int** matrix, int vertices, int source) {
     std::queue<int> q;
@@ -24,25 +26,18 @@ std::vector<bool> breadth_first_print(int** matrix, int vertices, int source) {
     return visited;
 }
 
-void visualise_graph(int** matrix, int vertices) {
+void visualise_graph(const Graph& graph) {
     // Create a DOT file that describes the graph
+    const std::span<const std::span<int>>& matrix = graph.m_adjacency_matrix;
     std::ofstream dotFile("graph.dot");
     dotFile << "graph G {\n";
-    bool single;
-    for (int i = 0; i < vertices; i++) {
-        single = true;
-        for (int j = i + 1; j < vertices; j++) {
-            // To avoid duplicate edges
-            if (matrix[i][j] == 1) {
-                dotFile << "  " << i << " -- " << j << ";\n";
-                single = false;
-            }
-        }
-        if (single) {
-            dotFile << "  " << i << ";\n";
-        }
+    for(const auto vertex : graph.vertices()){
+        dotFile << "\t" << vertex << ";\n";
     }
-    dotFile << "}\n";
+    for (const auto[src,dst] : graph.edges()) {
+        dotFile << "\t" << src << " -- " << dst << ";\n";
+    }
+    dotFile << "}" << std::endl;
     dotFile.close();
 
     // Use Graphviz to visualize the graph
@@ -168,24 +163,15 @@ int main() {
     /*   int matrix[verts][verts];
        memset(matrix, 0, sizeof matrix);*/
 
-    int** matrix;
-    matrix = new int* [verts];
-    for (int i = 0; i < verts; i++)
-        matrix[i] = new int[verts];
 
-    for (int i = 0; i < verts; i++) {
-        for (int j = i + 1; j < verts; j++) {
-            if (should_assign(probability)) {
-                matrix[i][j] = 1;
-                matrix[j][i] = 1;
-            } else {
-                matrix[i][j] = 0;
-                matrix[j][i] = 0;
-            }
-        }
+    Graph graph = Graph::randomized(verts, static_cast<double>(probability) / 100.0);
+
+    int** matrix = new int*[verts];
+    for (int i = 0; i < verts; ++i) {
+        matrix[i] = graph.m_adjacency_matrix[i].data();
     }
 
-    visualise_graph(matrix, verts);
+    visualise_graph(graph);
     print_matrix(matrix, verts);
 
     //connectGraph(matrix, verts);
