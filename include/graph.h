@@ -19,6 +19,8 @@ public:
 public:
     explicit Graph(int vertex_count);
 
+    virtual ~Graph();
+
     static Graph randomized(int vertex_count, double connection_probability);
 
     [[nodiscard]] unsigned int vertex_count() const;
@@ -33,7 +35,10 @@ public:
 
     [[nodiscard]] vector<Edge> edges() const;
 
-    virtual ~Graph();
+    [[nodiscard]] vector<int> adjacent(int vertex) const;
+
+    [[nodiscard]] unsigned int degree(int vertex) const;
+
 };
 
 

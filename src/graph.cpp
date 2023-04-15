@@ -1,6 +1,7 @@
 #include "graph.h"
 #include <stdexcept>
 #include <random>
+#include <ranges>
 
 Graph::Graph(int vertex_count) {
     m_adjacency_matrix = span(new span<int>[vertex_count], vertex_count);
@@ -96,4 +97,14 @@ vector<Graph::Edge> Graph::edges() const {
         }
     }
     return edges;
+}
+
+vector<int> Graph::adjacent(int vertex) const {
+    auto adjacent = std::ranges::views::iota(0, static_cast<int>(vertex_count()))
+            | std::views::filter([&](int v) { return are_connected({vertex, v}); });
+    return {adjacent.begin(), adjacent.end()};
+}
+
+unsigned int Graph::degree(int vertex) const {
+    return std::accumulate(m_adjacency_matrix[vertex].begin(), m_adjacency_matrix[vertex].end(), 0);
 }
