@@ -14,8 +14,8 @@ void breadth_first_search(const Graph& graph,
         int current = q.front();
         q.pop();
         on_visit(current);
-        for (int vertex: graph.vertices()) {
-            if (!visited.contains(vertex) && graph.are_connected({current, vertex})) {
+        for (int vertex: graph.adjacent(current)) {
+            if (!visited.contains(vertex)) {
                 q.push(vertex);
                 visited.insert(vertex);
             }
