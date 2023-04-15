@@ -2,21 +2,22 @@
 #include <fstream>
 #include <queue>
 #include <algorithm>
-#include <span>
+#include <unordered_set>
+#include <ranges>
 #include "graph.h"
 
-std::vector<bool> breadth_first_print(int** matrix, int vertices, int source) {
+std::vector<bool> breadth_first_print(const Graph& graph, int source) {
     std::queue<int> q;
     q.push(source);
-    std::vector<bool> visited(vertices, false);
+    std::vector<bool> visited(graph.vertex_count(), false);
     visited[source] = true;
 
     while (!q.empty()) {
         int current = q.front();
         q.pop();
         std::cout << current << " ";
-        for (int j = 0; j < vertices; j++) {
-            if (matrix[current][j] == 1 && !visited[j]) {
+        for (int j: graph.vertices()) {
+            if (graph.are_connected({current, j}) && !visited[j]) {
                 q.push(j);
                 visited[j] = true;
             }
@@ -28,33 +29,31 @@ std::vector<bool> breadth_first_print(int** matrix, int vertices, int source) {
 
 void visualise_graph(const Graph& graph) {
     // Create a DOT file that describes the graph
-    const std::span<const std::span<int>>& matrix = graph.m_adjacency_matrix;
-    std::ofstream dotFile("graph.dot");
-    dotFile << "graph G {\n";
-    for(const auto vertex : graph.vertices()){
-        dotFile << "\t" << vertex << ";\n";
+    std::ofstream dot_file("graph.dot");
+    dot_file << "graph G {\n";
+    for (const auto vertex: graph.vertices()) {
+        dot_file << "\t" << vertex << ";\n";
     }
-    for (const auto[src,dst] : graph.edges()) {
-        dotFile << "\t" << src << " -- " << dst << ";\n";
+    for (const auto [src, dst]: graph.edges()) {
+        dot_file << "\t" << src << " -- " << dst << ";\n";
     }
-    dotFile << "}" << std::endl;
-    dotFile.close();
+    dot_file << "}" << std::endl;
+    dot_file.close();
 
     // Use Graphviz to visualize the graph
     system("dot -Tpdf graph.dot -o graph.pdf"); // Change the output format as needed
 
 }
 
-void connectGraph(int** matrix, int vertices) {
+void connect_graph(Graph graph) {
     // Connect Graph
-    std::vector<bool> subGraph = breadth_first_print(matrix, vertices, 0);
-    int lastConnection = 0;
-    for (int i = 0; i < vertices; i++) {
-        if (subGraph[i] != 1) {
-            matrix[lastConnection][i] = 1;
-            matrix[i][lastConnection] = 1;
-            subGraph = breadth_first_print(matrix, vertices, 0);
-            lastConnection = i;
+    std::vector<bool> subgraph = breadth_first_print(graph, 0);
+    int last_connection = 0;
+    for (int i: graph.vertices()) {
+        if (subgraph[i] != 1) {
+            graph.add_edge({i, last_connection});
+            subgraph = breadth_first_print(graph, 0);
+            last_connection = i;
         }
     }
 
@@ -64,52 +63,40 @@ void connectGraph(int** matrix, int vertices) {
 
 void print_matrix(const Graph& graph) {
 
-    for (int i : graph.vertices()) {
-        for (int j : graph.vertices()) {
-            std::cout << (graph.are_connected({i,j}) ? 1 : 0) << " ";
+    for (int i: graph.vertices()) {
+        for (int j: graph.vertices()) {
+            std::cout << (graph.are_connected({i, j}) ? 1 : 0) << " ";
         }
         std::cout << "\n";
     }
     std::cout.flush();
 }
 
-bool validate_vertex_cover(const int* vertex_cover_vertices, int** vertexCoverMatrix, int vertices) {
-    for (int i = 0; i < vertices; i++) {
-        for (int j = i + 1; j < vertices; j++) {
-            if (vertexCoverMatrix[i][j] == 1 && vertex_cover_vertices[i] == 0 && vertex_cover_vertices[j] == 0) {
-                return false;
-            }
-        }
-    }
-    return true;
+bool validate_vertex_cover(const Graph& graph, const std::unordered_set<int>& vertex_cover_vertices) {
+    return std::ranges::all_of(graph.edges(), [&](const auto& edge) {
+        auto [src, dst] = edge;
+        return vertex_cover_vertices.contains(src) && vertex_cover_vertices.contains(dst);
+    });
 }
 
-bool vertex_cover_of_size(int** matrix, int vertices) {
-    int minimum_vertex_cover;
-    std::cin >> minimum_vertex_cover;
+bool vertex_cover_of_size(const Graph& graph, unsigned int vertex_cover_size) {
 
-    int vertex_cover_vertices[vertices];
-    memset(vertex_cover_vertices, 0, sizeof vertex_cover_vertices);
-    int** vertex_cover_matrix;
-    vertex_cover_matrix = new int* [vertices];
-    memcpy(vertex_cover_matrix, matrix, vertices * vertices * sizeof(int));
+    std::span<bool> vertex_mask = std::span(new bool[vertex_cover_size], vertex_cover_size);
 
-    for (int k = 0; k <= minimum_vertex_cover; k++) {
-        memset(vertex_cover_vertices, 0, sizeof vertex_cover_vertices);
-        // add the size of the vertex cover for permutations
-        for (int i = vertices - 1; i >= vertices - k; i--) {
-            vertex_cover_vertices[i] = 1;
-        }
+    for (int k = 0; k <= vertex_cover_size; k++) {
+        memset(vertex_mask.data(), 0, vertex_mask.size_bytes()); // set all to 0
+        memset(vertex_mask.data(), 1, k); // set k first to 1
         do {
-            //for (int j = 0; j < vertices; j++)
-            //{
-            //    std::cout << vertex_cover_vertices[j] << ' ';
-            //}
-            //std::cout << '\n';
-            if (validate_vertex_cover(vertex_cover_vertices, vertex_cover_matrix, vertices)) {
+            std::unordered_set<int> vertex_cover_vertices;
+            for (int i = 0; i < vertex_mask.size(); ++i) {
+                if (vertex_mask[i]) {
+                    vertex_cover_vertices.insert(i);
+                }
+            }
+            if (validate_vertex_cover(graph, vertex_cover_vertices)) {
                 return true;
             }
-        } while (std::next_permutation(vertex_cover_vertices, vertex_cover_vertices + vertices));
+        } while (std::next_permutation(vertex_mask.begin(), vertex_mask.end()));
     }
     return false;
 }
@@ -151,30 +138,23 @@ int main() {
     std::cout << "Input probability of connection: ";
     std::cin >> probability;
 
-    probability = (probability - 100) * -1;
-
-    /*   int matrix[vertex_count][vertex_count];
-       memset(matrix, 0, sizeof matrix);*/
-
-
     Graph graph = Graph::randomized(vertex_count, static_cast<double>(probability) / 100.0);
-
-    int** matrix = new int*[vertex_count];
-    for (int i = 0; i < vertex_count; ++i) {
-        matrix[i] = graph.m_adjacency_matrix[i].data();
-    }
 
     visualise_graph(graph);
     print_matrix(graph);
 
-    //connectGraph(matrix, vertex_count);
+    std::cout << "Do you want to connect the graph? [Y/n]? ";
+    std::string input;
+    std::cin >> input;
+    if (!(input == "n" || input == "N" || input == "no" || input == "No")) {
+        connect_graph(graph);
+    }
 
-    //visualise_graph(matrix, vertex_count);
-    //print_matrix(matrix, vertex_count);
+    int vertex_cover_size;
+    std::cout << "Input vertex cover size: ";
+    std::cin >> vertex_cover_size;
 
-    //per();
-
-    if (vertex_cover_of_size(matrix, vertex_count)) {
+    if (vertex_cover_of_size(graph, vertex_cover_size)) {
         std::cout << "possible";
     } else {
         std::cout << "not possible";

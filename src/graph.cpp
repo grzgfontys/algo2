@@ -26,7 +26,7 @@ Graph Graph::randomized(int vertex_count, double connection_probability) {
     std::random_device rd{};
     std::mt19937 mt(rd());
     std::uniform_real_distribution<double> dist(0.0, 1.0);
-    auto should_assign = [&]() { return dist(mt) >= connection_probability; };
+    auto should_assign = [&]() { return dist(mt) < connection_probability; };
 
     for (int i = 0; i < vertex_count; i++) {
         for (int j = i + 1; j < vertex_count; j++) {
@@ -39,6 +39,10 @@ Graph Graph::randomized(int vertex_count, double connection_probability) {
     }
 
     return graph;
+}
+
+unsigned int Graph::vertex_count() const {
+    return m_adjacency_matrix.size();
 }
 
 #pragma clang diagnostic push
