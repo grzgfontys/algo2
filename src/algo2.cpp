@@ -105,35 +105,6 @@ std::optional<std::unordered_set<int>> vertex_cover_of_size(const Graph& graph, 
     return std::nullopt;
 }
 
-//void per()
-//{
-//    int myints[3] = { 0, 0, 1 };
-//
-//    std::cout << "The 3! possible permutations with 3 elements:\n";
-//    do {
-//        std::cout << myints[0] << ' ' << myints[1] << ' ' << myints[2] << '\n';
-//    } while (std::next_permutation(myints, myints + 3));
-//
-//    std::cout << "After loop: " << myints[0] << ' ' << myints[1] << ' ' << myints[2] << '\n';
-//
-//
-//    for (int k = 0; k <= 3; k++)
-//    {
-//        memset(myints, 0, sizeof myints);
-//        // add the size of the vertex cover for permutations
-//        for (int i = 3 - 1; i >= 3-k; i--)
-//        {
-//            myints[i] = 1;
-//        }
-//        do {
-//            for (int j = 0; j < 3; j++)
-//            {
-//                std::cout << myints[j] << ' ';
-//            }
-//            std::cout << '\n';
-//        } while (std::next_permutation(myints, myints + 3));
-//    }
-//}
 
 int main() {
     int vertex_count, probability;
