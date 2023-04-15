@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <unordered_set>
 #include <ranges>
+#include <optional>
+#include <span>
 #include "graph.h"
 
 std::vector<bool> breadth_first_print(const Graph& graph, int source) {
@@ -72,33 +74,33 @@ void print_matrix(const Graph& graph) {
     std::cout.flush();
 }
 
-bool validate_vertex_cover(const Graph& graph, const std::unordered_set<int>& vertex_cover_vertices) {
-    return std::ranges::all_of(graph.edges(), [&](const auto& edge) {
-        auto [src, dst] = edge;
-        return vertex_cover_vertices.contains(src) && vertex_cover_vertices.contains(dst);
-    });
-}
+std::optional<std::unordered_set<int>> vertex_cover_of_size(const Graph& graph, unsigned int vertex_cover_size) {
+    using std::ranges::all_of;
 
-bool vertex_cover_of_size(const Graph& graph, unsigned int vertex_cover_size) {
-
-    std::span<bool> vertex_mask = std::span(new bool[vertex_cover_size], vertex_cover_size);
+    const unsigned int vertex_count = graph.vertex_count();
+    std::span<bool> vertex_mask = std::span(new bool[vertex_count], vertex_count);
 
     for (int k = 0; k <= vertex_cover_size; k++) {
         memset(vertex_mask.data(), 0, vertex_mask.size_bytes()); // set all to 0
-        memset(vertex_mask.data(), 1, k); // set k first to 1
+        memset(vertex_mask.data(), 1, k * sizeof(bool)); // set k first to 1
         do {
-            std::unordered_set<int> vertex_cover_vertices;
-            for (int i = 0; i < vertex_mask.size(); ++i) {
-                if (vertex_mask[i]) {
-                    vertex_cover_vertices.insert(i);
-                }
+            // range of all the vertices that are set in the mask
+            auto selected_vertices = std::views::iota(0u, vertex_count)
+                    | std::ranges::views::filter([&](int x) { return vertex_mask[x]; });
+
+            // convert range to hashset
+            std::unordered_set<int> vertex_cover_vertices(selected_vertices.begin(), selected_vertices.end());
+
+            // ensure that all edges are being covered by at least 1 vertex
+            if (all_of(graph.edges(), [&](const auto& edge) {
+                auto [src, dst] = edge;
+                return vertex_cover_vertices.contains(src) || vertex_cover_vertices.contains(dst);
+            })) {
+                return vertex_cover_vertices;
             }
-            if (validate_vertex_cover(graph, vertex_cover_vertices)) {
-                return true;
-            }
-        } while (std::next_permutation(vertex_mask.begin(), vertex_mask.end()));
+        } while (std::prev_permutation(vertex_mask.begin(), vertex_mask.end()));
     }
-    return false;
+    return std::nullopt;
 }
 
 //void per()
@@ -154,8 +156,13 @@ int main() {
     std::cout << "Input vertex cover size: ";
     std::cin >> vertex_cover_size;
 
-    if (vertex_cover_of_size(graph, vertex_cover_size)) {
-        std::cout << "possible";
+    auto vertex_cover_result = vertex_cover_of_size(graph, vertex_cover_size);
+    if (vertex_cover_result) {
+        std::cout << "possible\n";
+        for (auto vertex: vertex_cover_result.value()) {
+            std::cout << vertex << " ";
+        }
+        std::cout << std::endl;
     } else {
         std::cout << "not possible";
     }
