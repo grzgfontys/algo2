@@ -1,12 +1,10 @@
 ﻿#include <iostream>
 #include <fstream>
 #include <queue>
-#include <algorithm>
 #include <unordered_set>
-#include <ranges>
 #include <optional>
-#include <span>
 #include "graph.h"
+#include "vertex_cover.h"
 
 std::vector<bool> breadth_first_print(const Graph& graph, int source) {
     std::queue<int> q;
@@ -73,38 +71,6 @@ void print_matrix(const Graph& graph) {
     }
     std::cout.flush();
 }
-
-std::optional<std::unordered_set<int>> vertex_cover_of_size(const Graph& graph, unsigned int vertex_cover_size) {
-    using std::ranges::all_of;
-
-    const unsigned int vertex_count = graph.vertex_count();
-    std::span<bool> vertex_mask = std::span(new bool[vertex_count], vertex_count);
-
-    for (int k = 0; k <= vertex_cover_size; k++) {
-        memset(vertex_mask.data(), 0, vertex_mask.size_bytes()); // set all to 0
-        memset(vertex_mask.data(), 1, k * sizeof(bool)); // set k first to 1
-        do {
-            // range of all the vertices that are set in the mask
-            auto selected_vertices = std::views::iota(0u, vertex_count)
-                    | std::ranges::views::filter([&](int x) { return vertex_mask[x]; });
-
-            // convert range to hashset
-            std::unordered_set<int> vertex_cover_vertices(selected_vertices.begin(), selected_vertices.end());
-
-            // ensure that all edges are being covered by at least 1 vertex
-            if (all_of(graph.edges(), [&](const auto& edge) {
-                auto [src, dst] = edge;
-                return vertex_cover_vertices.contains(src) || vertex_cover_vertices.contains(dst);
-            })) {
-                delete[] vertex_mask.data();
-                return vertex_cover_vertices;
-            }
-        } while (std::prev_permutation(vertex_mask.begin(), vertex_mask.end()));
-    }
-    delete[] vertex_mask.data();
-    return std::nullopt;
-}
-
 
 int main() {
     int vertex_count, probability;
