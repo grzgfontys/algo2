@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(SOURCE_FILES
 	src/algo2.cpp
 	src/graph.cpp
-	src/vertex_cover.cpp)
+	src/vertex_cover.cpp src/graph_connection.cpp)
 
 ADD_EXECUTABLE(main ${SOURCE_FILES})
 

@@ -1,31 +1,8 @@
 ﻿#include <iostream>
 #include <fstream>
-#include <queue>
-#include <unordered_set>
-#include <optional>
 #include "graph.h"
 #include "vertex_cover.h"
-
-std::vector<bool> breadth_first_print(const Graph& graph, int source) {
-    std::queue<int> q;
-    q.push(source);
-    std::vector<bool> visited(graph.vertex_count(), false);
-    visited[source] = true;
-
-    while (!q.empty()) {
-        int current = q.front();
-        q.pop();
-        std::cout << current << " ";
-        for (int j: graph.vertices()) {
-            if (graph.are_connected({current, j}) && !visited[j]) {
-                q.push(j);
-                visited[j] = true;
-            }
-        }
-    }
-    std::cout << std::endl;
-    return visited;
-}
+#include "graph_connection.h"
 
 void visualise_graph(const Graph& graph) {
     // Create a DOT file that describes the graph
@@ -43,22 +20,6 @@ void visualise_graph(const Graph& graph) {
     // Use Graphviz to visualize the graph
     system("dot -Tpdf graph.dot -o graph.pdf"); // Change the output format as needed
 
-}
-
-void connect_graph(Graph graph) {
-    // Connect Graph
-    std::vector<bool> subgraph = breadth_first_print(graph, 0);
-    int last_connection = 0;
-    for (int i: graph.vertices()) {
-        if (subgraph[i] != 1) {
-            graph.add_edge({i, last_connection});
-            subgraph = breadth_first_print(graph, 0);
-            last_connection = i;
-        }
-    }
-
-    int stop;
-    std::cin >> stop;
 }
 
 void print_matrix(const Graph& graph) {
