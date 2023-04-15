@@ -21,7 +21,7 @@ public:
 
     static Graph randomized(int vertex_count, double connection_probability);
 
-    unsigned int vertex_count() const;
+    [[nodiscard]] unsigned int vertex_count() const;
 
     void add_edge(Edge edge);
 

@@ -50,6 +50,8 @@ int main() {
     std::cin >> input;
     if (!(input == "n" || input == "N" || input == "no" || input == "No")) {
         connect_graph(graph);
+        visualise_graph(graph);
+        print_matrix(graph);
     }
 
     int vertex_cover_size;

@@ -1,34 +1,46 @@
-#include <vector>
+#include <unordered_set>
 #include <queue>
 #include "graph_connection.h"
 
-std::vector<bool> breadth_first_print(const Graph& graph, int source) {
+void breadth_first_search(const Graph& graph,
+                          int source,
+                          std::unordered_set<int>& visited,
+                          const std::function<void(int)>& on_visit) {
     std::queue<int> q;
     q.push(source);
-    std::vector<bool> visited(graph.vertex_count(), false);
-    visited[source] = true;
+    visited.insert(source);
 
     while (!q.empty()) {
         int current = q.front();
         q.pop();
-        for (int j: graph.vertices()) {
-            if (graph.are_connected({current, j}) && !visited[j]) {
-                q.push(j);
-                visited[j] = true;
+        on_visit(current);
+        for (int vertex: graph.vertices()) {
+            if (!visited.contains(vertex) && graph.are_connected({current, vertex})) {
+                q.push(vertex);
+                visited.insert(vertex);
             }
         }
     }
-    return visited;
 }
 
+
 void connect_graph(Graph& graph) {
-    std::vector<bool> subgraph = breadth_first_print(graph, 0);
-    int last_connection = 0;
-    for (int i: graph.vertices()) {
-        if (subgraph[i] != 1) {
-            graph.add_edge({i, last_connection});
-            subgraph = breadth_first_print(graph, 0);
-            last_connection = i;
-        }
+    auto vertices = graph.vertices();
+    std::unordered_set disconnected_nodes(vertices.begin(), vertices.end());
+
+    std::unordered_set<int> visited{};
+    constexpr int source_vertex = 0;
+    breadth_first_search(graph, source_vertex, visited, [&](int v) {
+        disconnected_nodes.erase(v);
+    });
+
+    while (!disconnected_nodes.empty()) {
+        const int vertex = *disconnected_nodes.begin(); // take first disconnected edge
+        graph.add_edge({source_vertex, vertex}); // add edge from source_vertex to disconnected edge
+
+        // mark all newly connected vertices as connected
+        breadth_first_search(graph, vertex, visited, [&](int v) {
+            disconnected_nodes.erase(v); // if we encounter edge during BFS, it is connected
+        });
     }
 }

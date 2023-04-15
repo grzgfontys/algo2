@@ -50,6 +50,9 @@ unsigned int Graph::vertex_count() const {
 
 void Graph::add_edge(Graph::Edge edge) {
     auto [i, j] = edge;
+    if (i == j) {
+        return;
+    }
     m_adjacency_matrix[i][j] = 1;
     m_adjacency_matrix[j][i] = 1;
 }
