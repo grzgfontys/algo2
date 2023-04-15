@@ -96,10 +96,12 @@ std::optional<std::unordered_set<int>> vertex_cover_of_size(const Graph& graph, 
                 auto [src, dst] = edge;
                 return vertex_cover_vertices.contains(src) || vertex_cover_vertices.contains(dst);
             })) {
+                delete[] vertex_mask.data();
                 return vertex_cover_vertices;
             }
         } while (std::prev_permutation(vertex_mask.begin(), vertex_mask.end()));
     }
+    delete[] vertex_mask.data();
     return std::nullopt;
 }
 
