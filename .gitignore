@@ -9,6 +9,10 @@ cmake-build-debug/
 # Graphviz files
 *.dot
 *.pdf
+*.bmp
+*.png
+*.jpeg
+*.svg
 
 # Compiled Object files
 *.slo

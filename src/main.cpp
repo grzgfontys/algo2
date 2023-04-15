@@ -12,8 +12,9 @@ int main() {
     std::cin >> probability;
 
     Graph graph = Graph::randomized(vertex_count, static_cast<double>(probability) / 100.0);
+    constexpr auto output_format = GraphOutputType::PNG;
 
-    visualise_graph(graph);
+    visualise_graph(graph, output_format);
     print_adjacency_matrix(graph);
 
     std::cout << "Do you want to connect the graph? [Y/n]? ";
@@ -21,7 +22,7 @@ int main() {
     std::cin >> input;
     if (!(input == "n" || input == "N" || input == "no" || input == "No")) {
         connect_graph(graph);
-        visualise_graph(graph);
+        visualise_graph(graph, output_format);
         print_adjacency_matrix(graph);
     }
 
