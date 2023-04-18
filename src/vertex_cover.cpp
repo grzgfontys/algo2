@@ -1,6 +1,8 @@
 #include <span>
 #include <cstring>
 #include <ranges>
+#include <functional>
+#include <algorithm>
 #include "vertex_cover.h"
 
 bool is_valid_vertex_cover(const Graph& graph, const std::unordered_set<int>& vertices) {

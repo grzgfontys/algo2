@@ -1,5 +1,6 @@
 #include <unordered_set>
 #include <queue>
+#include <functional>
 #include "graph_connection.h"
 
 void breadth_first_search(const Graph& graph,

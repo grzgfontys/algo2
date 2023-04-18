@@ -2,6 +2,9 @@
 #include <stdexcept>
 #include <random>
 #include <ranges>
+#include <functional>
+#include <algorithm>
+#include <numeric>
 
 Graph::Graph(int vertex_count) {
     m_adjacency_matrix = span(new span<int>[vertex_count], vertex_count);

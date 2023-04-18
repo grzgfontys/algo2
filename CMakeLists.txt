@@ -8,7 +8,8 @@ SET(SOURCE_FILES
 	src/graph.cpp
 	src/vertex_cover.cpp
 	src/graph_connection.cpp
-	src/graph_visualization.cpp)
+	src/graph_visualization.cpp
+	src/kernelization.cpp)
 
 ADD_EXECUTABLE(${PROJECT_NAME} ${SOURCE_FILES})
 

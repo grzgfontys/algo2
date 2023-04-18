@@ -1,6 +1,7 @@
 #include "kernelization.h"
 #include "graph.h"
 #include <ranges>
+#include <algorithm>
 #include <stdexcept>
 
 namespace views = std::views;
