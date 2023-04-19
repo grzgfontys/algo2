@@ -116,3 +116,30 @@ void add_tops(Graph& graph, int edge_count, unsigned int count) {
         throw std::runtime_error("Cannot add any more tops vertices");
     }
 }
+
+void remove_tops(Graph& graph, int edge_count, unsigned int count) {
+    auto is_tops = tops_checker(graph, edge_count);
+    auto safe_to_disconnect = [&](int v) -> bool { return graph.degree(v) != edge_count + 1; };
+
+    for (auto vertex: graph.vertices() | views::filter(is_tops)) {
+        if (count == 0) {
+            break;
+        }
+
+        auto removable = graph.adjacent(vertex) | views::filter(safe_to_disconnect);
+        std::vector<int> removable_vec = {removable.begin(), removable.end()};
+
+        auto to_remove = graph.degree(vertex) - edge_count;
+        if (removable_vec.size() < to_remove) {
+            continue;
+        }
+        for (int adjacent: removable_vec | ranges::views::take(to_remove)) {
+            graph.remove_edge({vertex, adjacent});
+        }
+        count--;
+    }
+
+    if (count > 0){
+        throw std::runtime_error("Cannot remove any more tops vertices");
+    }
+}
