@@ -65,6 +65,9 @@ void remove_pendants(Graph& graph, unsigned int count) {
     auto is_pendant = pendant_checker(graph);
 
     for (auto vertex: graph.vertices() | views::filter(is_pendant)) {
+        if (count == 0) {
+            break;
+        }
         auto adjacent = graph.adjacent(vertex).front();
         if (is_pendant(adjacent)) {
             if (count >= 2) {
@@ -79,5 +82,37 @@ void remove_pendants(Graph& graph, unsigned int count) {
 
     if (count > 0) {
         throw std::runtime_error("Cannot remove any more pendants");
+    }
+}
+
+void add_tops(Graph& graph, int edge_count, unsigned int count) {
+    auto is_tops = tops_checker(graph, edge_count);
+    auto is_not_tops = [&](int v) { return !is_tops(v); };
+    auto is_not_almost_tops = [&](int v) -> bool { return graph.degree(v) < edge_count; };
+
+    auto vertices = graph.vertices();
+    for (auto vertex: vertices | views::filter(is_not_tops)) {
+        if (count == 0) {
+            break;
+        }
+        auto degree = graph.degree(vertex);
+
+        auto available_neighbors = vertices | views::filter(is_not_almost_tops)
+                | views::filter([&](int v) { return !graph.are_connected({vertex, v}); });
+
+        std::vector<int> available_neighbors_vec = {available_neighbors.begin(), available_neighbors.end()};
+
+        auto to_add = edge_count - degree + 1;
+        if (available_neighbors_vec.size() < to_add) {
+            throw std::runtime_error("Cannot add any more tops vertices");
+        }
+        for (int new_neighbor: available_neighbors_vec | ranges::views::take(to_add)) {
+            graph.add_edge({vertex, new_neighbor});
+        }
+        count--;
+    }
+
+    if (count > 0) {
+        throw std::runtime_error("Cannot add any more tops vertices");
     }
 }
