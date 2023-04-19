@@ -5,6 +5,7 @@
 #include <stdexcept>
 
 namespace views = std::views;
+namespace ranges = std::ranges;
 
 auto isolation_checker(const Graph& graph) {
     return [&](int vertex) { return graph.degree(vertex) == 0; };
@@ -33,7 +34,7 @@ std::vector<int> tops_vertices(const Graph& graph, int edge_count) {
     return {tops_vertices.begin(), tops_vertices.end()};
 }
 
-void add_pendants(Graph& graph, int count) {
+void add_pendants(Graph& graph, unsigned int count) {
     auto is_pendant = pendant_checker(graph);
     auto is_not_pendant = [&](int v) { return !is_pendant(v); };
 
@@ -45,7 +46,8 @@ void add_pendants(Graph& graph, int count) {
         }
         if (graph.degree(vertex) > 1) {
             auto adjacent = graph.adjacent(vertex);
-            if (!std::ranges::all_of(adjacent.begin(), adjacent.end(), is_not_pendant)) {
+            auto is_removable = [&](int v) { return graph.degree(v) > 2; };
+            if (!ranges::all_of(adjacent.begin(), adjacent.end(), is_removable)) {
                 continue;
             }
             for (int adjacent_vertex: adjacent | views::drop(1)) {
@@ -56,5 +58,26 @@ void add_pendants(Graph& graph, int count) {
     }
     if (count > 0) {
         throw std::runtime_error("Cannot add any more pendants");
+    }
+}
+
+void remove_pendants(Graph& graph, unsigned int count) {
+    auto is_pendant = pendant_checker(graph);
+
+    for (auto vertex: graph.vertices() | views::filter(is_pendant)) {
+        auto adjacent = graph.adjacent(vertex).front();
+        if (is_pendant(adjacent)) {
+            if (count >= 2) {
+                graph.remove_edge({vertex, adjacent}); // make vertex disconnected
+                count -= 2;
+            }
+        } else if (graph.degree(adjacent) > 2) {
+            graph.remove_edge({vertex, adjacent}); // make vertex disconnected
+            count--;
+        }
+    }
+
+    if (count > 0) {
+        throw std::runtime_error("Cannot remove any more pendants");
     }
 }
