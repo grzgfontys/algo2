@@ -19,6 +19,8 @@ public:
 public:
     explicit Graph(int vertex_count);
 
+    Graph(Graph& other);
+
     virtual ~Graph();
 
     static Graph randomized(int vertex_count, double connection_probability);
