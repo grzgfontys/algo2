@@ -1,11 +1,11 @@
-#include <unordered_set>
+#include <set>
 #include <queue>
 #include <functional>
 #include "graph_connection.h"
 
 void breadth_first_search(const Graph& graph,
                           int source,
-                          std::unordered_set<int>& visited,
+                          std::set<int>& visited,
                           const std::function<void(int)>& on_visit) {
     std::queue<int> q;
     q.push(source);
@@ -27,9 +27,9 @@ void breadth_first_search(const Graph& graph,
 
 void connect_graph(Graph& graph) {
     auto vertices = graph.vertices();
-    std::unordered_set disconnected_nodes(vertices.begin(), vertices.end());
+    std::set disconnected_nodes(vertices.begin(), vertices.end());
 
-    std::unordered_set<int> visited{};
+    std::set<int> visited{};
     constexpr int source_vertex = 0;
     breadth_first_search(graph, source_vertex, visited, [&](int v) {
         disconnected_nodes.erase(v);
