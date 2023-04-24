@@ -45,15 +45,21 @@ CommandResult handle_command(Graph& graph, const std::string& command, int tops_
         unsigned long kernelized_duration = duration_cast<std::chrono::milliseconds>(stop - start).count();
         std::cout << "Kernelized vertex cover took " << kernelized_duration << "ms\n";
 
+
         if (vertex_cover_result) {
             std::cout << "possible\n";
             for (auto vertex: vertex_cover_result.value()) {
                 std::cout << vertex << " ";
             }
             std::cout << "\n";
-            if (vertex_cover_result != kernelized_result) {
-                throw std::logic_error("Two vertex covers yielding different results");
+            if (vertex_cover_result.has_value() != kernelized_result.has_value()) {
+                throw std::logic_error("Algorithms yield contrary result concerning the existence of a vertex cover");
             }
+            std::cout << "kernelized version:\n";
+            for (auto vertex: vertex_cover_result.value()) {
+                std::cout << vertex << " ";
+            }
+            std::cout << "\n";
         } else {
             std::cout << "not possible\n";
         }
@@ -99,7 +105,7 @@ int main() {
     Graph graph = Graph::randomized(vertex_count, static_cast<double>(probability) / 100.0);
     std::cout << "-- Graph generated" << std::endl;
 
-//    visualise_graph(graph, OUTPUT_FORMAT);
+    visualise_graph(graph, OUTPUT_FORMAT);
     if (vertex_count < 50) {
         print_adjacency_matrix(graph);
     }
@@ -123,10 +129,11 @@ int main() {
 
         if (result == CommandResult::Undefined) {
             std::cerr << "No such command, type \'exit\' to exit." << std::endl;
+            std::cin.clear();
         }
 
         if (result == CommandResult::OK) {
-//            visualise_graph(graph, OUTPUT_FORMAT);
+            visualise_graph(graph, OUTPUT_FORMAT);
         }
     } while (result != CommandResult::Exit);
 

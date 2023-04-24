@@ -13,7 +13,7 @@ Graph::Graph(int vertex_count) {
     }
 }
 
-Graph::Graph(Graph& other) {
+Graph::Graph(const Graph& other) {
     int vertex_count = static_cast<int>(other.vertex_count());
     m_adjacency_matrix = span(new span<int>[vertex_count], vertex_count);
     for (int i = 0; i < vertex_count; ++i) {

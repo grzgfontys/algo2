@@ -19,7 +19,7 @@ public:
 public:
     explicit Graph(int vertex_count);
 
-    Graph(Graph& other);
+    Graph(const Graph& other);
 
     virtual ~Graph();
 
