@@ -1,20 +1,19 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
-#include <format>
 #include "graph_visualization.h"
 
 std::string get_format_string(GraphOutputType format) {
     switch (format) {
-        case BMP:
+        case GraphOutputType::BMP:
             return "bmp";
-        case PNG:
+        case GraphOutputType::PNG:
             return "png";
-        case JPEG:
+        case GraphOutputType::JPEG:
             return "jpeg";
-        case SVG:
+        case GraphOutputType::SVG:
             return "svg";
-        case PDF:
+        case GraphOutputType::PDF:
             return "pdf";
     }
 }

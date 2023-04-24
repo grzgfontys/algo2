@@ -4,7 +4,7 @@
 #include "graph.h"
 #include <string>
 
-enum GraphOutputType
+enum class GraphOutputType
 {
     BMP,
     PNG,
