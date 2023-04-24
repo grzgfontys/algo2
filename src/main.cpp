@@ -4,6 +4,7 @@
 #include "graph_connection.h"
 #include "graph_visualization.h"
 #include "kernelization.h"
+#include <chrono>
 
 void display_graph_stats(const Graph& graph, int tops_threshold) {
     std::cout << "Number of vertices: " << graph.vertices().size() << "\nIsolated vertices: "
@@ -29,17 +30,35 @@ CommandResult handle_command(Graph& graph, const std::string& command, int tops_
         std::cout << "Input vertex cover size: ";
         std::cin >> vertex_cover_size;
 
+        using clock = std::chrono::high_resolution_clock;
+        using std::chrono::duration_cast;
+
+        auto start = clock::now();
         auto vertex_cover_result = vertex_cover_of_size(graph, vertex_cover_size);
+        auto stop = clock::now();
+        unsigned long naive_duration = duration_cast<std::chrono::milliseconds>(stop - start).count();
+        std::cout << "Naive vertex cover took " << naive_duration << "ms\n";
+
+        start = clock::now();
+        auto kernelized_result = vertex_cover_kernelized(graph, vertex_cover_size);
+        stop = clock::now();
+        unsigned long kernelized_duration = duration_cast<std::chrono::milliseconds>(stop - start).count();
+        std::cout << "Kernelized vertex cover took " << kernelized_duration << "ms\n";
+
         if (vertex_cover_result) {
             std::cout << "possible\n";
             for (auto vertex: vertex_cover_result.value()) {
                 std::cout << vertex << " ";
             }
             std::cout << "\n";
+            if (vertex_cover_result != kernelized_result) {
+                throw std::logic_error("Two vertex covers yielding different results");
+            }
         } else {
             std::cout << "not possible\n";
         }
         std::cout.flush();
+
         return CommandResult::OK;
     }
     if (command == "stats") {
@@ -78,9 +97,12 @@ int main() {
     std::cin >> probability;
 
     Graph graph = Graph::randomized(vertex_count, static_cast<double>(probability) / 100.0);
+    std::cout << "-- Graph generated" << std::endl;
 
-    visualise_graph(graph, OUTPUT_FORMAT);
-    print_adjacency_matrix(graph);
+//    visualise_graph(graph, OUTPUT_FORMAT);
+    if (vertex_count < 50) {
+        print_adjacency_matrix(graph);
+    }
 
     int tops_threshold;
     std::cout << "Enter tops threshold: ";
@@ -104,9 +126,8 @@ int main() {
         }
 
         if (result == CommandResult::OK) {
-            visualise_graph(graph, OUTPUT_FORMAT);
+//            visualise_graph(graph, OUTPUT_FORMAT);
         }
-
     } while (result != CommandResult::Exit);
 
     return 0;
