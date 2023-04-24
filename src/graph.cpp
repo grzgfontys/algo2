@@ -33,7 +33,7 @@ Graph Graph::randomized(int vertex_count, double connection_probability) {
     auto should_assign = [&]() { return dist(mt) < connection_probability; };
 
     for (int i = 0; i < vertex_count; i++) {
-        for (int j = i + 1; j < vertex_count; j++) {
+        for (int j = i; j < vertex_count; j++) {
             if (should_assign()) {
                 graph.add_edge({i, j});
             } else {
@@ -55,7 +55,8 @@ unsigned int Graph::vertex_count() const {
 void Graph::add_edge(Graph::Edge edge) {
     auto [i, j] = edge;
     if (i == j) {
-        return;
+        m_adjacency_matrix[i][j] = 0;
+        m_adjacency_matrix[j][i] = 0;
     }
     m_adjacency_matrix[i][j] = 1;
     m_adjacency_matrix[j][i] = 1;
